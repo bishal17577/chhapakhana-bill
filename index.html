@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Bill Calculator - Gajuri Chhapakhana</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #198754;
+            --danger-color: #dc3545;
+            --info-color: #5bc0de;
+            --bg-body: #f0f2f5;
+            --bg-panel: #ffffff;
+            --bg-header: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --radius-medium: 12px;
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: 0.3s ease;
+        }
+
+        html[data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --secondary-color: #22c55e;
+            --info-color: #4dd0e1;
+            --bg-body: #111827;
+            --bg-panel: #1f2937;
+            --bg-header: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+        }
+        
+        html[data-theme="classic"] {
+            --primary-color: #004aad;
+            --secondary-color: #006400;
+            --info-color: #007bff;
+            --bg-body: #e6e9f0;
+            --bg-panel: #ffffff;
+            --bg-header: #ffffff;
+            --text-primary: #121212;
+            --text-secondary: #555555;
+            --border-color: #d0d7de;
+        }
+
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            transition: background-color var(--transition), color var(--transition);
+        }
+
+        .top-header {
+            background-color: var(--bg-header);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .top-header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-controls .icon-btn, .header-controls select {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            height: 40px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 1rem;
+        }
+        .header-controls .icon-btn {
+             width: 40px;
+             border-radius: 50%;
+             padding: 0;
+        }
+
+        .header-controls .icon-btn:hover, .header-controls select:hover {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem;
+        }
+
+        .panel {
+            background-color: var(--bg-panel);
+            border-radius: var(--radius-medium);
+            box-shadow: var(--shadow-soft);
+            padding: 2rem;
+            transition: background-color var(--transition);
+        }
+        
+        .calculator-panel {
+            position: relative;
+        }
+        
+        #customer-name-suggestions {
+            position: absolute;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            width: calc(100% - 4rem);
+            z-index: 10;
+            border-radius: 0 0 8px 8px;
+            box-shadow: var(--shadow-soft);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .suggestion-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+
+        h2, h3 { margin-bottom: 1rem; color: var(--primary-color); }
+        h2 { border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.1rem; color: var(--text-secondary); margin-top: 1.5rem; }
+
+        .form-group { margin-bottom: 1.25rem; position: relative; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; font-family: 'Poppins', sans-serif; transition: border-color var(--transition), box-shadow var(--transition); background-color: var(--bg-body); color: var(--text-primary); }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px hsla(217, 98%, 52%, 0.2); }
+        .form-group .checkbox-label { display: flex; align-items: center; gap: 0.5rem; }
+        .form-group input[type="checkbox"] { width: auto; }
+        
+        .form-row { display: flex; gap: 1rem; }
+        .form-row .form-group { flex: 1; }
+
+        .btn { width: 100%; padding: 1rem; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn:disabled { cursor: not-allowed; background-color: #ccc !important; color: #666 !important; box-shadow: none; }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--text-secondary); color: white; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-print { background-color: var(--secondary-color); color: white; }
+        .btn-info { background-color: var(--info-color); color: white; }
+        
+        #bill-panel { font-family: 'Roboto Mono', monospace; }
+        .bill-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+        .bill-tab { padding: 0.75rem 1.25rem; cursor: pointer; color: var(--text-secondary); font-weight: 500; font-family: 'Poppins', sans-serif; border-bottom: 3px solid transparent; }
+        .bill-tab.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .bill-header { display: flex; gap: 1rem; align-items: center; text-align: left; margin-bottom: 2rem; }
+        #bill-logo-container { flex-shrink: 0; }
+        #bill-logo { max-width: 100px; max-height: 100px; }
+        .bill-header .company-details { flex-grow: 1; }
+        .bill-header h2 { margin: 0; color: var(--text-primary); }
+        .bill-header p { font-size: 0.9rem; color: var(--text-secondary); margin: 0.1rem 0; }
+        
+        .bill-meta { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .bill-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+        .bill-table th, .bill-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .bill-table th { background-color: var(--bg-body); font-family: 'Poppins', sans-serif; font-weight: 600; }
+        .bill-table td.number { text-align: right; }
+        .bill-table .item-description { font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 500;}
+        .bill-table .item-details { font-size: 0.8rem; color: var(--text-secondary); }
+        
+        .bill-summary-grid { display: grid; grid-template-columns: 1fr auto; }
+        .bill-totals { grid-column: 2 / 3; }
+        .total-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 1rem; gap: 2rem; align-items: center; }
+        .total-row input { background: var(--bg-body); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .total-row.grand-total { font-weight: 700; font-size: 1.2rem; border-top: 2px solid var(--text-primary); margin-top: 0.5rem; padding-top: 0.75rem; color: var(--primary-color); }
+        .bill-actions { margin-top: 2rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .bill-footer { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed var(--border-color); font-size: 0.9rem; color: var(--text-secondary); }
+        .remove-item-btn { background: none; border: none; color: var(--danger-color); cursor: pointer; font-size: 1.2rem; }
+        
+        #calculator-options .calc-section { display: none; }
+        #calculator-options .calc-section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.visible { display: flex; }
+        .modal { background: var(--bg-panel); padding: 2rem; border-radius: var(--radius-medium); box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 500px; width: 90%; position: relative; }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; background:none; border:none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; }
+
+        /* History List Styles */
+        #history-list { list-style: none; max-height: 400px; overflow-y: auto; padding-right: 1rem;}
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid var(--border-color); }
+        .history-item:hover { background: var(--bg-body); }
+        .history-item-info { font-family: 'Poppins', sans-serif; }
+        .history-item-info strong { color: var(--primary-color); }
+        .history-item-actions { display: flex; gap: 0.5rem; }
+        .history-item-actions .icon-btn { width: 36px; height: 36px; background-color: var(--bg-body); }
+        
+        @media (max-width: 1200px) {
+            .main-container { grid-template-columns: 400px 1fr; }
+        }
+        @media (max-width: 992px) {
+            .main-container { grid-template-columns: 1fr; }
+            .top-header { flex-direction: column; gap: 1rem; }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body { padding: 0; background-color: #fff; color: #000; }
+            .top-header, .calculator-panel, .bill-actions, .no-print, .bill-tabs { display: none !important; }
+            .main-container { display: block; }
+            .bill-panel { box-shadow: none; border: none; width: 100%; padding: 0; }
+            .bill-table, .bill-table th, .bill-table td { border-color: #ccc; }
+            .bill-header h2, .bill-header p, h3 { color: #000; }
+            :root { --primary-color: #000; --danger-color: #000; }
+            @page { size: A4; margin: 20mm; }
+        }
+    </style>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="top-header">
+        <h1>Pro Calculator</h1>
+        <div class="header-controls">
+            <select id="theme-switcher">
+                <option value="light">Light Theme</option>
+                <option value="dark">Dark Theme</option>
+                <option value="classic">Classic Blue</option>
+            </select>
+            <button class="icon-btn" id="settings-btn" title="Settings"><i class="fas fa-cog"></i></button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- LEFT: Calculator Panel -->
+        <div class="calculator-panel panel">
+            <h2>Job Calculator</h2>
+            
+            <div class="form-group">
+                <label for="customer-name">Customer Name</label>
+                <input type="text" id="customer-name" placeholder="Start typing a name..." autocomplete="off">
+                <div id="customer-name-suggestions"></div>
+            </div>
+            <!-- ADDED BILL NUMBER INPUT HERE -->
+            <div class="form-group">
+                <label for="bill-number-input">Bill No.</label>
+                <input type="text" id="bill-number-input" placeholder="e.g., INV-123456">
+            </div>
+            <div class="form-group">
+                <label for="customer-contact">Customer Contact</label>
+                <input type="text" id="customer-contact" placeholder="e.g., 98xxxxxxxx">
+            </div>
+            <hr style="margin: 2rem 0; border: 1px solid var(--border-color);">
+            <div class="form-group">
+                <label for="job-type">Select Job Type</label>
+                <select id="job-type"></select>
+            </div>
+
+            <div id="calculator-options"></div>
+
+            <div class="form-group" style="margin-top: 2rem;">
+                 <button id="add-to-bill-btn" class="btn btn-primary" disabled><i class="fas fa-plus"></i> Add to Bill</button>
+            </div>
+        </div>
+
+        <!-- RIGHT: Bill Panel -->
+        <div id="bill-panel" class="bill-panel panel">
+            <nav class="bill-tabs">
+                <div class="bill-tab active" data-tab="invoice">Invoice</div>
+                <div class="bill-tab" data-tab="history">History</div>
+            </nav>
+
+            <div id="invoice-content" class="tab-content active">
+                <header class="bill-header">
+                    <div id="bill-logo-container"></div>
+                    <div class="company-details">
+                        <h2 id="bill-company-name">Gajuri Chhapakhana</h2>
+                        <p id="bill-company-address">Gajuri-1, Dhading</p>
+                        <p id="bill-company-contact">Phone: 9761614027</p>
+                        <p id="bill-company-pan"></p>
+                    </div>
+                </header>
+
+                <section class="bill-meta">
+                    <div class="customer-details">
+                        <strong>Bill To:</strong>
+                        <div id="bill-customer-name">N/A</div>
+                        <div id="bill-customer-contact"></div>
+                    </div>
+                    <div class="invoice-details" style="text-align: right;">
+                        <strong>Bill No:</strong> <span id="bill-number"></span><br>
+                        <strong>Date:</strong> <span id="bill-date-time"></span>
+                    </div>
+                </section>
+
+                <section class="bill-items">
+                    <table class="bill-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Description</th>
+                                <th class="number">Rate</th>
+                                <th class="number">Qty</th>
+                                <th class="number">Amount</th>
+                                <th class="no-print"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="bill-items-body"></tbody>
+                    </table>
+                </section>
+
+                <section class="bill-summary-grid">
+                    <div class="bill-totals">
+                        <div class="total-row">
+                            <span>Subtotal</span>
+                            <span id="bill-subtotal">Rs. 0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Discount</span>
+                            <input type="number" id="bill-discount" value="0" min="0" style="width: 100px; text-align: right; padding: 4px;">
+                        </div>
+                        <div class="total-row">
+                            <span>Tax/VAT (%)</span>
+                            <input type="number" id="bill-tax" value="0" min="0" style="width: 100px; text-align: right; padding: 4px;">
+                        </div>
+                        <div class="total-row">
+                            <span>Paid Amount</span>
+                            <input type="number" id="bill-paid" value="0" min="0" style="width: 100px; text-align: right; padding: 4px;">
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>GRAND TOTAL</span>
+                            <span id="bill-grand-total" data-value="0">Rs. 0.00</span>
+                        </div>
+                        <div class="total-row grand-total" style="color: var(--danger-color); border-top: 1px dashed var(--border-color); margin-top:0; padding-top:0.5rem">
+                            <span>Amount Due</span>
+                            <span id="bill-amount-due">Rs. 0.00</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <footer class="bill-footer" id="bill-footer-text">
+                    <p>Thank you for your business!</p>
+                </footer>
+            </div>
+
+            <div id="history-content" class="tab-content">
+                <h3>Bill History</h3>
+                <ul id="history-list"></ul>
+            </div>
+            
+            <div class="bill-actions">
+                <button id="save-bill-btn" class="btn btn-secondary"><i class="fas fa-save"></i> Save</button>
+                <button id="clear-bill-btn" class="btn btn-danger"><i class="fas fa-trash"></i> Clear</button>
+                <button id="download-bill-btn" class="btn btn-info" disabled><i class="fas fa-download"></i> Download</button>
+                <button id="print-bill-btn" class="btn btn-print" disabled><i class="fas fa-print"></i> Print</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" id="settings-close-btn">×</button>
+            <h2>Settings</h2>
+            <div class="form-group">
+                <label for="setting-company-name">Company Name</label>
+                <input type="text" id="setting-company-name">
+            </div>
+            <div class="form-group">
+                <label for="setting-company-address">Address</label>
+                <input type="text" id="setting-company-address">
+            </div>
+            <div class="form-group">
+                <label for="setting-company-contact">Contact</label>
+                <input type="text" id="setting-company-contact">
+            </div>
+             <div class="form-group">
+                <label for="setting-company-pan">PAN/VAT No.</label>
+                <input type="text" id="setting-company-pan">
+            </div>
+            <div class="form-group">
+                <label for="setting-logo-upload">Company Logo</label>
+                <input type="file" id="setting-logo-upload" accept="image/*">
+            </div>
+             <div class="form-group">
+                <label for="setting-footer-text">Bill Footer Text</label>
+                <input type="text" id="setting-footer-text">
+            </div>
+            <button id="save-settings-btn" class="btn btn-primary">Save Settings</button>
+        </div>
+    </div>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const PriceList = {
+        'flex-normal': 50, 'flex-sticker': 70, 'visiting-card-single': 1.5, 'visiting-card-double': 2.5, 'id-card': 80,
+        'canvas-print': 120, 'sticker-vinyl': 0.5, 't-shirt-jersey': 400, 'jersey-customization': 150, 'cup-print': 250, 'passport-photo': 150,
+        'photo-print-4R': 25, 'photo-print-6R': 50, 'medal': 300, 'trophy': 800, 'certificate': 100,
+        'lamination': 20, 'board-banner': 150, 'light-board': 250,
+        'wedding-card-single': 25, 'wedding-card-double': 40, 'wedding-card-box': 100,
+        'document-a4-bw-single': 5, 'document-a4-bw-double': 8, 'document-a4-color-single': 20, 'document-a4-color-double': 35,
+        'bill-pad': 150
+    };
+
+    const JobDefinitions = {
+        'flex-normal': { name: 'Flex (Normal)', unit: 'sq.ft.', fields: ['width-height', 'quantity', 'rate'] },
+        'flex-sticker': { name: 'Flex (Sticker)', unit: 'sq.ft.', fields: ['width-height', 'quantity', 'rate'] },
+        'visiting-card': { name: 'Visiting Card', unit: 'pcs', fields: ['paper-type', 'print-sides', 'lamination', 'quantity', 'rate'] },
+        'id-card': { name: 'ID Card (PVC)', unit: 'pcs', fields: ['quantity', 'rate'] },
+        'photo-frame': { name: 'Photo Frame', unit: 'pcs', fields: ['width-height', 'frame-type', 'quantity', 'rate'] },
+        'wedding-card': { name: 'Wedding Card', unit: 'pcs', fields: ['card-type', 'paper-type', 'quantity', 'rate'] },
+        't-shirt-jersey': { name: 'T-Shirt / Jersey Print', unit: 'pcs', fields: ['tshirt-size', 'custom-name-number', 'quantity', 'rate'] },
+        'light-board': { name: 'Light Board', unit: 'sq.ft.', fields: ['width-height', 'quantity', 'rate'] },
+        'document-print': { name: 'Document Print', unit: 'pages', fields: ['paper-size-doc', 'print-color', 'print-sides', 'quantity', 'rate'] },
+        'bill-pad': { name: 'Bill Pad / Receipt', unit: 'books', fields: ['book-size', 'book-copies', 'quantity', 'rate'] },
+        'canvas-print': { name: 'Canvas Print', unit: 'sq.ft.', fields: ['width-height', 'quantity', 'rate'] },
+        'sticker-vinyl': { name: 'Sticker (Vinyl)', unit: 'sq.in.', fields: ['width-height', 'quantity', 'rate'] },
+        'cup-print': { name: 'Cup Print', unit: 'pcs', fields: ['quantity', 'rate'] },
+        'passport-photo': { name: 'Passport Photo', unit: 'sets', fields: ['quantity', 'rate'] },
+        'photo-print': { name: 'Photo Print', unit: 'pcs', fields: ['photo-size', 'quantity', 'rate'] },
+        'medal': { name: 'Medal', unit: 'pcs', fields: ['item-description', 'quantity', 'rate'] },
+        'trophy': { name: 'Trophy', unit: 'pcs', fields: ['item-description', 'quantity', 'rate'] },
+        'certificate': { name: 'Certificate Print', unit: 'pcs', fields: ['paper-type', 'quantity', 'rate'] },
+        'lamination': { name: 'Lamination', unit: 'pcs', fields: ['item-description', 'quantity', 'rate'] },
+        'board-banner': { name: 'Board Banner (Sunboard)', unit: 'sq.ft.', fields: ['width-height', 'quantity', 'rate'] }
+    };
+    
+    const Settings = {
+        config: { companyName: 'Gajuri Chhapakhana', address: 'Gajuri-1, Dhading', contact: 'Phone: 9761614027', pan: '', logo: '', footerText: 'Thank you for your business!', theme: 'light' },
+        init() { this.load(); document.getElementById('settings-btn').addEventListener('click', () => this.openModal()); document.getElementById('settings-close-btn').addEventListener('click', () => this.closeModal()); document.getElementById('save-settings-btn').addEventListener('click', () => this.save()); document.getElementById('theme-switcher').addEventListener('change', (e) => this.setTheme(e.target.value)); },
+        load() { const savedConfig = JSON.parse(localStorage.getItem('chhapakhanaConfig')); if (savedConfig) { this.config = { ...this.config, ...savedConfig }; } this.applyAll(); },
+        save() { this.config.companyName = document.getElementById('setting-company-name').value; this.config.address = document.getElementById('setting-company-address').value; this.config.contact = document.getElementById('setting-company-contact').value; this.config.pan = document.getElementById('setting-company-pan').value; this.config.footerText = document.getElementById('setting-footer-text').value; const logoFile = document.getElementById('setting-logo-upload').files[0]; if (logoFile) { const reader = new FileReader(); reader.onload = (e) => { this.config.logo = e.target.result; localStorage.setItem('chhapakhanaConfig', JSON.stringify(this.config)); this.applyAll(); }; reader.readAsDataURL(logoFile); } else { localStorage.setItem('chhapakhanaConfig', JSON.stringify(this.config)); this.applyAll(); } this.closeModal(); },
+        applyAll() { document.getElementById('bill-company-name').textContent = this.config.companyName; document.getElementById('bill-company-address').textContent = this.config.address; document.getElementById('bill-company-contact').textContent = this.config.contact; document.getElementById('bill-company-pan').textContent = this.config.pan ? `PAN: ${this.config.pan}` : ''; document.getElementById('bill-footer-text').textContent = this.config.footerText; const logoContainer = document.getElementById('bill-logo-container'); logoContainer.innerHTML = this.config.logo ? `<img id="bill-logo" src="${this.config.logo}" alt="Company Logo">` : ''; this.setTheme(this.config.theme); },
+        setTheme(theme) { this.config.theme = theme; document.documentElement.dataset.theme = theme; document.getElementById('theme-switcher').value = theme; localStorage.setItem('chhapakhanaConfig', JSON.stringify(this.config)); },
+        openModal() { document.getElementById('setting-company-name').value = this.config.companyName; document.getElementById('setting-company-address').value = this.config.address; document.getElementById('setting-company-contact').value = this.config.contact; document.getElementById('setting-company-pan').value = this.config.pan; document.getElementById('setting-footer-text').value = this.config.footerText; document.getElementById('settings-modal').classList.add('visible'); },
+        closeModal() { document.getElementById('settings-modal').classList.remove('visible'); }
+    };
+    
+    const History = {
+        bills: [],
+        init() { this.load(); this.render(); },
+        load() { this.bills = JSON.parse(localStorage.getItem('billHistory')) || []; },
+        save() { localStorage.setItem('billHistory', JSON.stringify(this.bills)); },
+        add(billState) { this.bills.unshift({ ...billState, savedAt: new Date() }); if (this.bills.length > 50) { this.bills.pop(); } this.save(); this.render(); },
+        render() { const listEl = document.getElementById('history-list'); listEl.innerHTML = this.bills.length === 0 ? `<li>No saved bills found.</li>` : this.bills.map((bill, index) => `<li class="history-item"><div class="history-item-info"><strong>${bill.billNumber}</strong> - ${bill.customer.name || 'N/A'} <br><small>${new Date(bill.savedAt).toLocaleString()}</small></div><div class="history-item-actions"><button class="icon-btn" onclick="Bill.loadFromHistory(${index})" title="Load Bill"><i class="fas fa-eye"></i></button><button class="icon-btn" onclick="History.delete(${index})" title="Delete Bill"><i class="fas fa-trash"></i></button></div></li>`).join(''); },
+        delete(index) { if (confirm('Are you sure?')) { this.bills.splice(index, 1); this.save(); this.render(); } }
+    };
+
+    const Bill = {
+        state: { customer: { name: '', contact: '' }, items: [], discount: 0, taxRate: 0, paidAmount: 0, billNumber: `INV-${Date.now().toString().slice(-6)}` },
+        init() {
+            this.cacheDOM(); Settings.init(); History.init(); this.populateJobTypes(); this.bindEvents(); this.render(); setInterval(() => this.updateTime(), 1000); this.setupKeyboardShortcuts();
+        },
+        cacheDOM() {
+            this.dom = {
+                customerNameInput: document.getElementById('customer-name'),
+                billNumberInput: document.getElementById('bill-number-input'), // CACHED NEW ELEMENT
+                customerContactInput: document.getElementById('customer-contact'),
+                jobTypeSelect: document.getElementById('job-type'),
+                calculatorOptions: document.getElementById('calculator-options'),
+                addToBillBtn: document.getElementById('add-to-bill-btn'),
+                printBillBtn: document.getElementById('print-bill-btn'),
+                downloadBillBtn: document.getElementById('download-bill-btn'),
+                clearBillBtn: document.getElementById('clear-bill-btn'),
+                saveBillBtn: document.getElementById('save-bill-btn'),
+                billCustomerName: document.getElementById('bill-customer-name'),
+                billCustomerContact: document.getElementById('bill-customer-contact'),
+                billNumber: document.getElementById('bill-number'),
+                billDateTime: document.getElementById('bill-date-time'),
+                billItemsBody: document.getElementById('bill-items-body'),
+                billSubtotal: document.getElementById('bill-subtotal'),
+                billDiscountInput: document.getElementById('bill-discount'),
+                billTaxInput: document.getElementById('bill-tax'),
+                billPaidInput: document.getElementById('bill-paid'),
+                billGrandTotal: document.getElementById('bill-grand-total'),
+                billAmountDue: document.getElementById('bill-amount-due'),
+            };
+        },
+        populateJobTypes() {
+            this.dom.jobTypeSelect.innerHTML = Object.keys(JobDefinitions).map(key => `<option value="${key}">${JobDefinitions[key].name}</option>`).join('');
+            this.renderCalculatorForm();
+        },
+        bindEvents() {
+            this.dom.jobTypeSelect.addEventListener('change', this.renderCalculatorForm.bind(this));
+            this.dom.addToBillBtn.addEventListener('click', this.addItem.bind(this));
+            this.dom.clearBillBtn.addEventListener('click', this.clearBill.bind(this));
+            this.dom.saveBillBtn.addEventListener('click', () => { if(this.state.items.length > 0) { History.add(this.state); alert('Bill saved to history!'); } else { alert('Cannot save an empty bill.'); } });
+            this.dom.calculatorOptions.addEventListener('input', () => { this.validateForm(); this.updateAddButtonPreview(); });
+            this.dom.customerNameInput.addEventListener('input', e => this.updateCustomer('name', e.target.value));
+            this.dom.customerContactInput.addEventListener('input', e => this.updateCustomer('contact', e.target.value));
+            
+            // ADDED EVENT LISTENER FOR BILL NUMBER INPUT
+            this.dom.billNumberInput.addEventListener('input', e => {
+                this.state.billNumber = e.target.value;
+                this.renderMeta();
+            });
+
+            [this.dom.billDiscountInput, this.dom.billTaxInput, this.dom.billPaidInput].forEach(input => input.addEventListener('input', () => { this.state.discount = parseFloat(this.dom.billDiscountInput.value) || 0; this.state.taxRate = parseFloat(this.dom.billTaxInput.value) || 0; this.state.paidAmount = parseFloat(this.dom.billPaidInput.value) || 0; this.renderTotals(); }));
+            this.dom.billItemsBody.addEventListener('click', this.handleItemRemoval.bind(this));
+            this.dom.printBillBtn.addEventListener('click', () => window.print());
+            this.dom.downloadBillBtn.addEventListener('click', this.downloadBillAsImage.bind(this));
+            document.querySelectorAll('.bill-tab').forEach(tab => tab.addEventListener('click', () => { document.querySelector('.bill-tab.active').classList.remove('active'); document.querySelector('.tab-content.active').classList.remove('active'); tab.classList.add('active'); document.getElementById(`${tab.dataset.tab}-content`).classList.add('active'); }));
+            this.dom.customerNameInput.addEventListener('input', () => this.showCustomerSuggestions());
+            this.dom.customerNameInput.addEventListener('blur', () => setTimeout(() => document.getElementById('customer-name-suggestions').innerHTML = '', 200));
+        },
+        renderCalculatorForm() {
+            const jobKey = this.dom.jobTypeSelect.value; const job = JobDefinitions[jobKey]; let html = '';
+            const fieldTemplates = {
+                'width-height': `<h3>Dimensions</h3><div class="form-row"><div class="form-group"><label for="calc-width">Width</label><input type="number" id="calc-width" min="0" required></div><div class="form-group"><label for="calc-height">Height</label><input type="number" id="calc-height" min="0" required></div><div class="form-group"><label for="calc-unit">Unit</label><select id="calc-unit"><option value="in">Inches (in)</option><option value="ft">Feet (ft)</option></select></div></div>`,
+                'quantity': `<div class="form-group"><label for="calc-quantity">Quantity</label><input type="number" id="calc-quantity" min="1" value="1" required></div>`,
+                'rate': `<div class="form-group"><label for="calc-rate">Rate (per ${job.unit})</label><input type="number" id="calc-rate" min="0" required></div>`,
+                'paper-type': `<div class="form-group"><label for="calc-paper-type">Paper Type</label><input type="text" id="calc-paper-type" placeholder="e.g., 300 GSM Art" value="300 GSM Art" required></div>`,
+                'print-sides': `<div class="form-group"><label for="calc-print-sides">Print Sides</label><select id="calc-print-sides"><option value="single">Single-Sided</option><option value="double">Double-Sided</option></select></div>`,
+                'lamination': `<div class="form-group"><label for="calc-lamination">Lamination</label><select id="calc-lamination"><option value="none">None</option><option value="matte">Matte</option><option value="glossy">Glossy</option></select></div>`,
+                'tshirt-size': `<div class="form-group"><label for="calc-tshirt-size">T-Shirt Size</label><select id="calc-tshirt-size"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select></div>`,
+                'photo-size': `<div class="form-group"><label for="calc-photo-size">Photo Size</label><select id="calc-photo-size"><option value="4R">4R (4x6 in)</option><option value="6R">6R (6x8 in)</option><option value="custom">Custom</option></select></div>`,
+                'item-description': `<div class="form-group"><label for="calc-item-description">Description</label><input type="text" id="calc-item-description" required></div>`,
+                'frame-type': `<div class="form-group"><label for="calc-frame-type">Frame Type</label><select id="calc-frame-type"><option>Standard Wood</option><option>Premium Wood</option><option>Metal</option><option>Acrylic</option></select></div>`,
+                'card-type': `<div class="form-group"><label for="calc-card-type">Card Type</label><select id="calc-card-type"><option value="single">Single Leaf</option><option value="double">Double Leaf</option><option value="box">Boxed</option></select></div>`,
+                'custom-name-number': `<div class="form-group"><label class="checkbox-label"><input type="checkbox" id="calc-custom-name"> Add Custom Name/Number (+${this.formatCurrency(PriceList['jersey-customization'])})</label></div>`,
+                'paper-size-doc': `<div class="form-group"><label for="calc-paper-size-doc">Paper Size</label><select id="calc-paper-size-doc"><option value="a4">A4</option><option value="legal">Legal</option></select></div>`,
+                'print-color': `<div class="form-group"><label for="calc-print-color">Color</label><select id="calc-print-color"><option value="bw">Black & White</option><option value="color">Color</option></select></div>`,
+                'book-size': `<div class="form-group"><label for="calc-book-size">Pad Size</label><select id="calc-book-size"><option>1/4</option><option>1/8</option><option>1/10</option></select></div>`,
+                'book-copies': `<div class="form-group"><label for="calc-book-copies">Copies</label><select id="calc-book-copies"><option>1+1 (Duplicate)</option><option>1+2 (Triplicate)</option></select></div>`,
+            };
+            job.fields.forEach(field => html += fieldTemplates[field]); this.dom.calculatorOptions.innerHTML = `<div class="calc-section active">${html}</div>`;
+            this.updateRate(); this.dom.calculatorOptions.addEventListener('change', this.updateRate.bind(this)); this.validateForm(); this.updateAddButtonPreview();
+        },
+        updateRate() {
+            const jobKey = this.dom.jobTypeSelect.value; const rateInput = document.getElementById('calc-rate'); if (!rateInput) return;
+            let priceKey = jobKey;
+            if (jobKey === 'visiting-card') { priceKey = `visiting-card-${document.getElementById('calc-print-sides').value}`; }
+            else if (jobKey === 'photo-print') { priceKey = `photo-print-${document.getElementById('calc-photo-size').value}`; }
+            else if (jobKey === 'wedding-card') { priceKey = `wedding-card-${document.getElementById('calc-card-type').value}`; }
+            else if (jobKey === 'document-print') { priceKey = `document-${document.getElementById('calc-paper-size-doc').value}-${document.getElementById('calc-print-color').value}-${document.getElementById('calc-print-sides').value}`; }
+            rateInput.value = PriceList[priceKey] || 0;
+        },
+        validateForm() { const inputs = this.dom.calculatorOptions.querySelectorAll('input[required], select[required]'); let isValid = true; inputs.forEach(input => { if (!input.value || (input.type === 'number' && parseFloat(input.value) <= 0)) { isValid = false; } }); this.dom.addToBillBtn.disabled = !isValid; },
+        updateAddButtonPreview() { const currentItem = this.calculateCurrentItem(); this.dom.addToBillBtn.innerHTML = (currentItem && currentItem.amount > 0) ? `<i class="fas fa-plus"></i> Add to Bill - ${this.formatCurrency(currentItem.amount)}` : `<i class="fas fa-plus"></i> Add to Bill`; },
+        addItem() { const item = this.calculateCurrentItem(); if (item && item.amount > 0) { this.state.items.push(item); this.render(); } else { alert('Please fill in all required fields.'); } },
+        calculateCurrentItem() {
+            const jobKey = this.dom.jobTypeSelect.value; let item = { description: JobDefinitions[jobKey].name, details: '', rate: 0, qty: 0, amount: 0 };
+            const val = (id) => document.getElementById(id)?.value; const num = (id) => parseFloat(val(id)) || 0; const int = (id) => parseInt(val(id), 10) || 0; const checked = (id) => document.getElementById(id)?.checked;
+            item.rate = num('calc-rate'); item.qty = int('calc-quantity') || 1;
+            
+            if (jobKey.startsWith('flex') || ['canvas-print', 'board-banner', 'light-board', 'photo-frame', 'sticker-vinyl'].includes(jobKey)) {
+                const width = num('calc-width'); const height = num('calc-height'); const unit = val('calc-unit') || (jobKey === 'sticker-vinyl' ? 'in' : 'ft'); let area = width * height; if (unit === 'in' && JobDefinitions[jobKey].unit === 'sq.ft.') { area /= 144; } else if (unit === 'ft' && JobDefinitions[jobKey].unit === 'sq.in.') { area *= 144; } item.details = `${width}x${height} ${unit}`; if (val('calc-frame-type')) { item.details += `, Frame: ${val('calc-frame-type')}`}; item.amount = area * item.rate * item.qty;
+            } else if (jobKey === 'visiting-card') { item.qty = int('calc-quantity'); item.details = `${val('calc-paper-type')}, ${val('calc-print-sides')}, Lam: ${val('calc-lamination')}`; item.amount = item.qty * item.rate; }
+            else if (jobKey === 't-shirt-jersey') { let totalRate = item.rate; item.details = `Size: ${val('calc-tshirt-size')}`; if(checked('calc-custom-name')) { totalRate += PriceList['jersey-customization']; item.details += ' + Custom Name/No.'; } item.amount = item.qty * totalRate; }
+            else { if (val('calc-photo-size')) item.details += `Size: ${val('calc-photo-size')}`; if (val('calc-item-description')) item.details += `${val('calc-item-description')}`; if (val('calc-paper-type')) item.details += `Paper: ${val('calc-paper-type')}`; if (val('calc-card-type')) item.details += `Type: ${val('calc-card-type')}`; if (val('calc-book-size')) item.details += `Size: ${val('calc-book-size')}, Copies: ${val('calc-book-copies')}`; if (jobKey === 'document-print') { item.qty = int('calc-quantity'); item.details = `Paper: ${val('calc-paper-size-doc').toUpperCase()}, ${val('calc-print-color')}, ${val('calc-print-sides')}` } item.amount = item.qty * item.rate; }
+            return item;
+        },
+        clearBill() { if(confirm('Are you sure? This will clear the current bill.')) { this.state = { ...this.state, items: [], discount: 0, taxRate: 0, paidAmount: 0, billNumber: `INV-${Date.now().toString().slice(-6)}` }; this.dom.billDiscountInput.value = 0; this.dom.billTaxInput.value = 0; this.dom.billPaidInput.value = 0; this.dom.customerNameInput.value = ''; this.dom.customerContactInput.value = ''; this.render(); } },
+        handleItemRemoval(e) { if (e.target.closest('.remove-item-btn')) { const itemIndex = parseInt(e.target.dataset.index, 10); this.state.items.splice(itemIndex, 1); this.render(); } },
+        updateTime() { this.dom.billDateTime.textContent = new Date().toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }); },
+        updateCustomer(key, value) { this.state.customer[key] = value; this.renderCustomer(); },
+        render() { this.renderCustomer(); this.renderMeta(); this.renderItems(); this.renderTotals(); },
+        renderCustomer() { this.dom.billCustomerName.textContent = this.state.customer.name || 'N/A'; this.dom.billCustomerContact.textContent = this.state.customer.contact || ''; },
+        renderMeta() {
+            this.dom.billNumber.textContent = this.state.billNumber;
+            this.dom.billNumberInput.value = this.state.billNumber; // UPDATED to sync input field
+            this.updateTime();
+        },
+        renderItems() { this.dom.billItemsBody.innerHTML = this.state.items.map((item, index) => `<tr><td>${index + 1}</td><td><div class="item-description">${item.description}</div><div class="item-details">${item.details}</div></td><td class="number">${this.formatCurrency(item.rate)}</td><td class="number">${item.qty}</td><td class="number">${this.formatCurrency(item.amount)}</td><td class="no-print"><button class="remove-item-btn" data-index="${index}">×</button></td></tr>`).join(''); },
+        renderTotals() {
+            const subtotal = this.state.items.reduce((sum, item) => sum + item.amount, 0); const taxAmount = (subtotal - this.state.discount) * (this.state.taxRate / 100); const grandTotal = subtotal - this.state.discount + taxAmount; const amountDue = grandTotal - this.state.paidAmount;
+            this.dom.billSubtotal.textContent = this.formatCurrency(subtotal); this.animateValue('bill-grand-total', parseFloat(this.dom.billGrandTotal.dataset.value) || 0, grandTotal, 300); this.dom.billGrandTotal.dataset.value = grandTotal; this.dom.billAmountDue.textContent = this.formatCurrency(amountDue);
+            const hasItems = this.state.items.length > 0;
+            this.dom.printBillBtn.disabled = !hasItems;
+            this.dom.downloadBillBtn.disabled = !hasItems;
+        },
+        animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id); if (start === end) { obj.textContent = this.formatCurrency(end); return; } let startTimestamp = null;
+            const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); const currentValue = progress * (end - start) + start; obj.textContent = this.formatCurrency(currentValue); if (progress < 1) { window.requestAnimationFrame(step); } };
+            window.requestAnimationFrame(step);
+        },
+        formatCurrency(amount) { return `Rs. ${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount || 0)}`; },
+        loadFromHistory(index) {
+            const billToLoad = History.bills[index];
+            if (billToLoad) {
+                this.state = JSON.parse(JSON.stringify(billToLoad));
+                this.dom.customerNameInput.value = this.state.customer.name;
+                this.dom.customerContactInput.value = this.state.customer.contact;
+                this.dom.billDiscountInput.value = this.state.discount;
+                this.dom.billTaxInput.value = this.state.taxRate;
+                this.dom.billPaidInput.value = this.state.paidAmount || 0;
+                this.render(); // This will call renderMeta and update the bill number input
+                document.querySelector('.bill-tab[data-tab="invoice"]').click();
+            }
+        },
+        downloadBillAsImage() {
+            const billElement = document.getElementById('invoice-content');
+            const button = this.dom.downloadBillBtn;
+            const originalText = button.innerHTML;
+
+            button.disabled = true;
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+
+            html2canvas(billElement, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-panel').trim()
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const customerName = (this.state.customer.name || 'bill').replace(/[\s/\\?%*:|"<>]/g, '_');
+                const filename = `${customerName}_${this.state.billNumber}.png`;
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }).catch(err => {
+                console.error('Error generating image:', err);
+                alert('Could not generate image. Please check the console for errors.');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        },
+        setupKeyboardShortcuts() { document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); this.dom.addToBillBtn.click(); } if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); if(!this.dom.printBillBtn.disabled) this.dom.printBillBtn.click(); } }); },
+        showCustomerSuggestions() {
+            const query = this.dom.customerNameInput.value.toLowerCase(); const suggestionsEl = document.getElementById('customer-name-suggestions'); if (!query) { suggestionsEl.innerHTML = ''; return; }
+            const uniqueCustomers = [...new Map(History.bills.map(item => [item.customer.name, item])).values()]; const suggestions = uniqueCustomers.filter(bill => bill.customer.name && bill.customer.name.toLowerCase().includes(query)).slice(0, 5);
+            if (suggestions.length > 0) {
+                suggestionsEl.innerHTML = suggestions.map(bill => `<div class="suggestion-item" data-name="${bill.customer.name}" data-contact="${bill.customer.contact || ''}">${bill.customer.name}</div>`).join('');
+                suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => item.addEventListener('click', (e) => { this.updateCustomer('name', e.target.dataset.name); this.updateCustomer('contact', e.target.dataset.contact); this.dom.customerNameInput.value = e.target.dataset.name; this.dom.customerContactInput.value = e.target.dataset.contact; suggestionsEl.innerHTML = ''; }));
+            } else { suggestionsEl.innerHTML = ''; }
+        }
+    };
+
+    window.Bill = Bill; window.History = History; Bill.init();
+});
+</script>
+</body>
+</html>
