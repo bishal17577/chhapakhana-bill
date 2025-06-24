@@ -344,7 +344,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${item.description}</td><td class="text-right">${item.rate.toFixed(2)}</td>
-                    <td class="text-right">${item.quantity}</td><td class="text-right">₹${item.amount.toFixed(2)}</td>
+                    <td class="text-right">${item.quantity}</td><td class="text-right">RS${item.amount.toFixed(2)}</td>
                 `;
                 billItemsTbody.appendChild(row);
                 total += item.amount;
